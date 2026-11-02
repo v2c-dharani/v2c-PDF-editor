@@ -3,7 +3,7 @@
 import { PDFDocument, rgb, degrees, StandardFonts } from 'pdf-lib';
 import JSZip from 'jszip';
 import QRCode from 'qrcode';
-import { TableData, EditorElement } from '@/types';
+import { TableData, EditorElement } from '../types';
 import {
   generateValidDocx,
   generateValidPptx,
@@ -1053,17 +1053,30 @@ export async function unlockPDF(file: File, password?: string): Promise<Uint8Arr
 /**
  * Crop / Adjust page margins on both CropBox and MediaBox for universal viewer support.
  */
-export async function cropPDF(file: File, cropPoints = 25): Promise<Uint8Array> {
+export type CropOptions = number | { top?: number; bottom?: number; left?: number; right?: number };
+
+/**
+ * Adjust page crop margins uniformly or per-edge.
+ * Accepts either a single number (points) or an object with top/bottom/left/right.
+ */
+export async function cropPDF(file: File, cropOptions: CropOptions = 25): Promise<Uint8Array> {
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+
+  const top = typeof cropOptions === 'number' ? cropOptions : (Number(cropOptions.top) || 0);
+  const bottom = typeof cropOptions === 'number' ? cropOptions : (Number(cropOptions.bottom) || 0);
+  const left = typeof cropOptions === 'number' ? cropOptions : (Number(cropOptions.left) || 0);
+  const right = typeof cropOptions === 'number' ? cropOptions : (Number(cropOptions.right) || 0);
 
   const pages = pdf.getPages();
   for (const page of pages) {
     const { width, height } = page.getSize();
-    const newW = Math.max(20, width - cropPoints * 2);
-    const newH = Math.max(20, height - cropPoints * 2);
-    page.setCropBox(cropPoints, cropPoints, newW, newH);
-    page.setMediaBox(cropPoints, cropPoints, newW, newH);
+    const newX = Math.max(0, left);
+    const newY = Math.max(0, bottom);
+    const newW = Math.max(20, width - left - right);
+    const newH = Math.max(20, height - top - bottom);
+    page.setCropBox(newX, newY, newW, newH);
+    page.setMediaBox(newX, newY, newW, newH);
   }
 
   return await pdf.save({ useObjectStreams: true });

@@ -1,4 +1,4 @@
-import { ToolCategory, PDFTool, CategoryItem } from '@/types';
+import { ToolCategory, PDFTool, CategoryItem } from '../types';
 
 export type { ToolCategory, PDFTool, CategoryItem };
 
