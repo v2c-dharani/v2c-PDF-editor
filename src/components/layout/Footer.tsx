@@ -28,7 +28,7 @@ export function Footer() {
               <ul className="space-y-2 text-xs text-slate-500">
                 {ALL_TOOLS.filter(t => t.category === cat.id).map((tool) => (
                   <li key={tool.id}>
-                    <Link href={tool.href} className="hover:text-blue-600 transition-colors">
+                    <Link href={tool.href} prefetch={false} className="hover:text-blue-600 transition-colors">
                       {tool.name}
                     </Link>
                   </li>

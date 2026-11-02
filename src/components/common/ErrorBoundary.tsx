@@ -66,10 +66,11 @@ export class ErrorBoundary extends Component<Props, State> {
                 <RefreshCw className="w-3.5 h-3.5" /> Try Again
               </button>
               <Link
-                href="/#tools"
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs sm:text-sm font-semibold hover:bg-slate-200 transition-colors"
+                href="/"
+                prefetch={false}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs sm:text-sm font-semibold hover:bg-slate-200 transition-colors cursor-pointer"
               >
-                <Home className="w-3.5 h-3.5" /> All Tools
+                <Home className="w-3.5 h-3.5" /> Back to Homepage
               </Link>
             </div>
           </div>

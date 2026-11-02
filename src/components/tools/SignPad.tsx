@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
-import { Pen, Type, RotateCcw, Check, Download, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import { Pen, Type, RotateCcw, Check, Download, ArrowLeft, Home } from 'lucide-react';
 import { PDFDocument, rgb } from 'pdf-lib';
 import { downloadFile, formatBytes } from '@/lib/pdf-engine';
 
@@ -169,12 +170,22 @@ export function SignPad({ pdfFile, onBack, onFinish }: SignPadProps) {
           <h3 className="font-extrabold text-slate-900 text-base sm:text-lg">Sign Your Document</h3>
           <p className="text-xs text-slate-500 truncate max-w-[180px] sm:max-w-md">Draw or type your signature for {pdfFile.name}</p>
         </div>
-        <button
-          onClick={onBack}
-          className="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 flex-shrink-0"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> Change
-        </button>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            type="button"
+            onClick={onBack}
+            className="text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1 cursor-pointer px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> Change
+          </button>
+          <Link
+            href="/"
+            prefetch={false}
+            className="text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1 cursor-pointer px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors"
+          >
+            <Home className="w-3.5 h-3.5" /> Homepage
+          </Link>
+        </div>
       </div>
 
       {/* Tabs: Draw vs Type */}

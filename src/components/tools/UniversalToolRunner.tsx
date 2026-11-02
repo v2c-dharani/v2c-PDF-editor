@@ -152,35 +152,7 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
   // QR Code link
   const [qrLink, setQrLink] = useState('');
 
-  // Ephemeral Storage Management & Auto-Purge Timer
-  const [ephemeralCountdown, setEphemeralCountdown] = useState<number>(60);
-  const [isMemoryCleared, setIsMemoryCleared] = useState<boolean>(false);
   const workspaceRef = useRef<HTMLDivElement>(null);
-
-  const purgeMemory = () => {
-    setResultBytes(null);
-    setResultBlob(null);
-    setResultText(null);
-    setIsMemoryCleared(true);
-  };
-
-  // Auto-purge timer for in-memory file data (Storage Management)
-  useEffect(() => {
-    if (step !== 'success' || isMemoryCleared) return;
-
-    const timer = setInterval(() => {
-      setEphemeralCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          purgeMemory();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [step, isMemoryCleared]);
 
   // Load PDF info when a file is selected
   const handleFilesSelected = async (newFiles: File[]) => {
@@ -654,8 +626,6 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
       setResultBlob(outBlob);
       setResultFilename(filename);
       setResultMimeType(mimeType);
-      setEphemeralCountdown(60);
-      setIsMemoryCleared(false);
       setStep('success');
 
       // Auto trigger download for instant satisfaction
@@ -685,10 +655,6 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
   };
 
   const handleManualDownload = () => {
-    if (isMemoryCleared) {
-      setErrorMessage('The file has been purged from memory for privacy. Please process the document again.');
-      return;
-    }
     if (resultBytes) {
       downloadFile(resultBytes, resultFilename, resultMimeType);
     } else if (resultText) {
@@ -712,8 +678,6 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
     setResultText(null);
     setResultBlob(null);
     setResultFilename('');
-    setEphemeralCountdown(60);
-    setIsMemoryCleared(false);
     setErrorMessage(null);
     setSelectedPages([]);
     setPageOrder([]);
@@ -784,19 +748,26 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
         {/* Navigation Breadcrumb & Tool Header (Hidden during visual PDF editing to give full mobile viewport to canvas) */}
         {!(step === 'configure' && tool.id === 'edit-pdf') && (
           <div className="mb-6 sm:mb-8">
-            <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-3 sm:mb-4 flex-wrap">
-              <Link href="/" className="hover:text-blue-600 transition-colors">
-                Home
+            <div className="flex items-center justify-between gap-3 mb-3 sm:mb-4">
+              <Link
+                href="/"
+                prefetch={false}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition-all active:scale-95 shadow-2xs group cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
+                <span>Back to Homepage</span>
               </Link>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
-              <Link href="/#tools" className="hover:text-blue-600 transition-colors">
-                Tools
-              </Link>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
-              <span className="text-slate-400 capitalize">{tool.category.replace(/-/g, ' ')}</span>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
-              <span className="text-[#0B1B3D] font-bold truncate max-w-[160px] sm:max-w-none">{tool.name}</span>
-            </nav>
+
+              <nav aria-label="Breadcrumb" className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                <Link href="/" prefetch={false} className="hover:text-blue-600 transition-colors">
+                  Home
+                </Link>
+                <ChevronRight className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
+                <span className="text-slate-400 capitalize">{tool.category.replace(/-/g, ' ')}</span>
+                <ChevronRight className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
+                <span className="text-[#0B1B3D] font-bold">{tool.name}</span>
+              </nav>
+            </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-3">
@@ -902,8 +873,6 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
                 setResultBytes(bytes);
                 setResultFilename(name);
                 setResultMimeType('application/pdf');
-                setEphemeralCountdown(60);
-                setIsMemoryCleared(false);
                 setStep('success');
               }}
             />
@@ -917,8 +886,6 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
                 setResultBytes(bytes);
                 setResultFilename(name);
                 setResultMimeType('application/pdf');
-                setEphemeralCountdown(60);
-                setIsMemoryCleared(false);
                 setStep('success');
               }}
             />
@@ -947,10 +914,18 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
                 <button
                   type="button"
                   onClick={resetState}
-                  className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200"
+                  className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200 cursor-pointer"
                 >
                   Change Files
                 </button>
+                <Link
+                  href="/"
+                  prefetch={false}
+                  className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200 cursor-pointer inline-flex items-center gap-1.5"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Homepage</span>
+                </Link>
               </div>
             </div>
 
@@ -1541,54 +1516,17 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
         {/* STEP 3: Success Screen */}
         {step === 'success' && (
           <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-12 text-center max-w-2xl mx-auto space-y-6 animate-in zoom-in-95">
-            <div className={`w-16 h-16 rounded-full mx-auto flex items-center justify-center border shadow-sm ${
-              isMemoryCleared ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'
-            }`}>
-              {isMemoryCleared ? (
-                <ShieldCheck className="w-8 h-8 stroke-[2.5]" />
-              ) : (
-                <CheckCircle2 className="w-8 h-8 stroke-[2.5]" />
-              )}
+            <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center border shadow-sm bg-emerald-50 text-emerald-600 border-emerald-100">
+              <CheckCircle2 className="w-8 h-8 stroke-[2.5]" />
             </div>
 
             <div>
               <h2 className="text-2xl font-extrabold text-[#0B1B3D] tracking-tight">
-                {isMemoryCleared ? 'File Purged from Memory' : `${tool.name} Completed!`}
+                {tool.name} Completed!
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 mt-1.5">
-                {isMemoryCleared
-                  ? 'For your privacy and security, temporary file data has been cleared from local memory.'
-                  : "Your processed file is ready. If the download didn't start automatically, click below."}
+                Your processed file is ready. If the download didn&apos;t start automatically, click below.
               </p>
-            </div>
-
-            {/* Ephemeral Storage / Privacy Notice */}
-            <div className={`p-3.5 rounded-2xl border text-xs flex items-center justify-between gap-3 text-left ${
-              isMemoryCleared
-                ? 'bg-amber-50/70 border-amber-200 text-amber-900'
-                : 'bg-emerald-50/70 border-emerald-200 text-emerald-900'
-            }`}>
-              <div className="flex items-center gap-2.5">
-                <ShieldCheck className="w-4 h-4 flex-shrink-0 text-emerald-600" />
-                <span>
-                  {isMemoryCleared ? (
-                    'Memory cleared. Zero trace retained.'
-                  ) : (
-                    <>
-                      Ephemeral RAM only. Auto-purging in <strong className="font-mono">{ephemeralCountdown}s</strong>
-                    </>
-                  )}
-                </span>
-              </div>
-              {!isMemoryCleared && (
-                <button
-                  type="button"
-                  onClick={purgeMemory}
-                  className="px-2.5 py-1 rounded-lg bg-white/80 hover:bg-white text-slate-700 font-bold border border-slate-200 transition-colors flex-shrink-0 text-[11px]"
-                >
-                  Purge Now
-                </button>
-              )}
             </div>
 
             {/* File info card with guaranteed overflow safety */}
@@ -1601,9 +1539,7 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
                   {resultFilename}
                 </h4>
                 <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
-                  {isMemoryCleared
-                    ? 'Purged'
-                    : resultBytes
+                  {resultBytes
                     ? formatBytes(resultBytes.length)
                     : resultBlob
                     ? formatBytes(resultBlob.size)
@@ -1613,40 +1549,31 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
             </div>
 
             {/* Primary Download Button in Website Theme */}
-            {!isMemoryCleared ? (
-              <button
-                type="button"
-                onClick={handleManualDownload}
-                className="w-full inline-flex items-center justify-center gap-2.5 px-8 py-3.5 sm:py-4 rounded-2xl bg-[#0B1B3D] hover:bg-[#122754] text-white font-extrabold text-sm sm:text-base active:scale-[0.98] transition-all shadow-md shadow-[#0B1B3D]/20 hover:shadow-xl"
-              >
-                <Download className="w-5 h-5 text-lime-400 stroke-[2.75]" />
-                <span>Download File</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={resetState}
-                className="w-full inline-flex items-center justify-center gap-2.5 px-8 py-3.5 sm:py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-sm sm:text-base active:scale-[0.98] transition-all shadow-md"
-              >
-                <RotateCw className="w-5 h-5" />
-                <span>Process Document Again</span>
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={handleManualDownload}
+              className="w-full inline-flex items-center justify-center gap-2.5 px-8 py-3.5 sm:py-4 rounded-2xl bg-[#0B1B3D] hover:bg-[#122754] text-white font-extrabold text-sm sm:text-base active:scale-[0.98] transition-all shadow-md shadow-[#0B1B3D]/20 hover:shadow-xl cursor-pointer"
+            >
+              <Download className="w-5 h-5 text-lime-400 stroke-[2.75]" />
+              <span>Download File</span>
+            </button>
 
             {/* Secondary Actions */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <button
                 type="button"
                 onClick={resetState}
-                className="w-full px-5 py-3 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs sm:text-sm hover:bg-slate-200 transition-colors"
+                className="w-full px-5 py-3 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs sm:text-sm hover:bg-slate-200 transition-colors cursor-pointer"
               >
                 Process Another Document
               </button>
               <Link
-                href="/#tools"
-                className="w-full px-5 py-3 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs sm:text-sm hover:bg-slate-200 transition-colors flex items-center justify-center"
+                href="/"
+                prefetch={false}
+                className="w-full px-5 py-3 rounded-xl bg-[#0B1B3D] text-white font-bold text-xs sm:text-sm hover:bg-[#122754] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
               >
-                Back to All Tools
+                <ArrowLeft className="w-4 h-4" />
+                <span>Back to Homepage</span>
               </Link>
             </div>
           </div>

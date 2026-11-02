@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Link from 'next/link';
 import {
+  Home,
   Type,
   Bold,
   Italic,
@@ -2129,12 +2131,22 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
           <button
             type="button"
             onClick={onBack}
-            className="p-1.5 sm:p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors flex items-center gap-1.5 text-xs font-bold"
+            className="p-1.5 sm:p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors flex items-center gap-1.5 text-xs font-bold cursor-pointer"
             title="Exit Editor"
           >
             <ArrowLeft className="w-4 h-4 text-slate-700" />
             <span className="hidden sm:inline">Exit Editor</span>
           </button>
+
+          <Link
+            href="/"
+            prefetch={false}
+            className="p-1.5 sm:p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+            title="Back to Homepage"
+          >
+            <Home className="w-4 h-4 text-slate-700" />
+            <span className="hidden sm:inline">Homepage</span>
+          </Link>
 
           <div className="h-5 w-px bg-slate-200 hidden sm:block" />
 
