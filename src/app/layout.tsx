@@ -8,7 +8,9 @@ export const metadata: Metadata = {
   description:
     'Free online PDF editor and tools to edit, merge, split, compress, convert, draw, add shapes, tables, and sign PDFs with 100% private in-browser processing. Powered by v2c PDF editor.',
   icons: {
-    icon: '/v2c-pdf-editor-logo.png',
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/v2c-pdf-editor-logo.png',
   },
 };
 

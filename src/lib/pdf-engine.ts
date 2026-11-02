@@ -1358,17 +1358,7 @@ export function downloadText(text: string, filename: string, mimeType = 'text/pl
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
-/**
- * Format bytes into human readable MB/KB.
- */
-export function formatBytes(bytes: number, decimals = 1): string {
-  if (!bytes || bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-}
+export { formatBytes } from './format-utils';
 
 
 /**

@@ -868,6 +868,27 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
                 </div>
               </div>
             )}
+
+            {/* Quick start with a blank document for Edit and Sign */}
+            {(tool.id === 'edit-pdf' || tool.id === 'sign-pdf') && (
+              <div className="text-center pt-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const { PDFDocument } = await import('pdf-lib');
+                    const pdfDoc = await PDFDocument.create();
+                    pdfDoc.addPage([595.28, 841.89]); // Standard A4 page
+                    const pdfBytes = await pdfDoc.save();
+                    const blankFile = new File([pdfBytes.buffer as ArrayBuffer], 'blank-document.pdf', { type: 'application/pdf' });
+                    handleFilesSelected([blankFile]);
+                  }}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all active:scale-95 shadow-xs cursor-pointer"
+                >
+                  <FilePlus2 className="w-4 h-4 text-blue-600" />
+                  <span>Or start directly with a blank canvas</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
 

@@ -51,15 +51,8 @@ export function Dropzone({
       const selectedFiles = Array.from(e.target.files);
       onFilesSelected(multiple ? selectedFiles : [selectedFiles[0]]);
     }
+    // Clear value so re-selecting identical filename works
     e.target.value = '';
-  };
-
-  const triggerPicker = (e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    fileInputRef.current?.click();
   };
 
   return (
@@ -67,26 +60,32 @@ export function Dropzone({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      onClick={() => triggerPicker()}
-      className={`group relative cursor-pointer overflow-hidden rounded-3xl border-2 border-dashed transition-all duration-300 p-8 sm:p-14 text-center bg-white ${
+      className={`group relative overflow-hidden rounded-3xl border-2 border-dashed transition-all duration-300 p-8 sm:p-14 text-center bg-white cursor-pointer ${
         isDragging
           ? 'border-[#0B1B3D] bg-slate-50 ring-4 ring-[#0B1B3D]/10 scale-[1.01]'
           : 'border-slate-300 hover:border-[#0B1B3D] bg-white hover:bg-slate-50/60 shadow-xs hover:shadow-md'
       }`}
     >
+      {/* 
+        Native full-surface file input overlay:
+        Sitting as absolute inset-0 with opacity-0 and z-20.
+        ANY click or tap anywhere across the entire card or button directly activates the browser native file chooser!
+        Eliminates synthetic .click() blocks on mobile WebViews, iOS Safari, Android, and Chromium.
+      */}
       <input
         ref={fileInputRef}
         type="file"
         accept={accept}
         multiple={multiple}
         onChange={handleFileInput}
-        className="hidden"
+        aria-label={title}
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
       />
 
-      <div className="relative flex flex-col items-center justify-center space-y-4 sm:space-y-5">
+      <div className="relative flex flex-col items-center justify-center space-y-4 sm:space-y-5 pointer-events-none select-none">
         
         {/* Upload Icon in Website Brand Navy Theme */}
-        <div className="relative pointer-events-none">
+        <div className="relative">
           <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#0B1B3D] text-white flex items-center justify-center shadow-lg shadow-[#0B1B3D]/20 group-hover:scale-105 group-hover:-translate-y-1 group-hover:bg-[#122754] transition-all duration-300">
             <FileUp className="w-8 h-8 sm:w-10 sm:h-10 text-white stroke-[2]" />
           </div>
@@ -95,20 +94,18 @@ export function Dropzone({
           </span>
         </div>
 
-        {/* Primary Action Button in Website Navy Theme */}
+        {/* Primary Action Button (visual appearance, native input handles click) */}
         <div className="w-full sm:w-auto space-y-2">
-          <button
-            type="button"
-            onClick={(e) => triggerPicker(e)}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 sm:px-10 sm:py-4 rounded-2xl bg-[#0B1B3D] hover:bg-[#122754] text-white font-bold text-sm sm:text-base active:scale-[0.98] transition-all duration-200 shadow-md shadow-[#0B1B3D]/20 hover:shadow-xl group-hover:bg-[#122754]"
+          <div
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 sm:px-10 sm:py-4 rounded-2xl bg-[#0B1B3D] group-hover:bg-[#122754] text-white font-bold text-sm sm:text-base transition-all duration-200 shadow-md shadow-[#0B1B3D]/20 group-hover:shadow-xl"
           >
             <Plus className="w-5 h-5 text-lime-400 stroke-[3]" />
             <span>{title}</span>
-          </button>
+          </div>
           
-          <p className="text-xs sm:text-sm font-medium text-slate-500 pointer-events-none pt-1">
+          <p className="text-xs sm:text-sm font-medium text-slate-500 pt-1">
             <span className="hidden sm:inline">{description}</span>
-            <span className="sm:hidden">or tap anywhere to browse files</span>
+            <span className="sm:hidden">Tap anywhere to browse files</span>
           </p>
         </div>
 

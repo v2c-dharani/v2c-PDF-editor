@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { History, FileText, CheckCircle2, Trash2 } from 'lucide-react';
-import { formatBytes } from '@/lib/pdf-engine';
+import { formatBytes } from '@/lib/format-utils';
 
 interface TaskRecord {
   id: string;
