@@ -22,7 +22,7 @@ export function getDb(): any {
     const { DatabaseSync } = eval('require')('node:sqlite');
     const db = new DatabaseSync(DB_PATH);
 
-    // Initialize Schema
+    // Initialize Schema with automatic cleanup support
     db.exec(`
       CREATE TABLE IF NOT EXISTS task_histories (
         id TEXT PRIMARY KEY,
@@ -59,10 +59,46 @@ export function getDb(): any {
 }
 
 /**
- * Run a parameterized query that returns rows (SELECT).
+ * Automatically purge expired records to ensure zero permanent storage buildup.
+ * Default retention is 5 minutes (300 seconds).
+ */
+export function purgeExpiredRecords(maxAgeSeconds = 300): void {
+  try {
+    const db = getDb();
+    // Delete task histories older than the retention threshold
+    const stmt = db.prepare(
+      `DELETE FROM task_histories WHERE created_at < datetime('now', '-' || ? || ' seconds')`
+    );
+    stmt.run(maxAgeSeconds);
+
+    // Delete expired shared documents
+    const docStmt = db.prepare(
+      `DELETE FROM shared_documents WHERE expires_at < datetime('now')`
+    );
+    docStmt.run();
+  } catch (err: any) {
+    // Non-blocking cleanup
+  }
+}
+
+/**
+ * Clear all task histories immediately on user request.
+ */
+export function clearAllTaskHistories(): void {
+  try {
+    const db = getDb();
+    db.exec(`DELETE FROM task_histories;`);
+  } catch (err: any) {
+    console.warn('Could not clear task histories:', err.message);
+  }
+}
+
+/**
+ * Run a parameterized query that returns rows (SELECT), auto-purging old records first.
  */
 export function querySqlite<T = any>(sql: string, params: any[] = []): T[] {
   try {
+    purgeExpiredRecords();
     const db = getDb();
     const stmt = db.prepare(sql);
     return stmt.all(...params) as T[];
@@ -73,10 +109,11 @@ export function querySqlite<T = any>(sql: string, params: any[] = []): T[] {
 }
 
 /**
- * Execute an INSERT, UPDATE, or DELETE statement.
+ * Execute an INSERT, UPDATE, or DELETE statement, auto-purging old records first.
  */
 export function runSqlite(sql: string, params: any[] = []): { changes: number | bigint; lastInsertRowid: number | bigint } {
   try {
+    purgeExpiredRecords();
     const db = getDb();
     const stmt = db.prepare(sql);
     return stmt.run(...params);

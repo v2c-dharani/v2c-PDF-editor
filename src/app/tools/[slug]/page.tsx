@@ -2,6 +2,7 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import { ALL_TOOLS, getToolBySlug } from '@/lib/tools-data';
 import { UniversalToolRunner } from '@/components/tools/UniversalToolRunner';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import type { Metadata } from 'next';
 
 interface ToolPageProps {
@@ -33,5 +34,9 @@ export default function ToolPage({ params }: ToolPageProps) {
     notFound();
   }
 
-  return <UniversalToolRunner tool={tool} />;
+  return (
+    <ErrorBoundary fallbackTitle={`Error in ${tool.name}`}>
+      <UniversalToolRunner tool={tool} />
+    </ErrorBoundary>
+  );
 }

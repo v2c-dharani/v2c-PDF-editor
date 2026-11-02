@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { History, FileText, CheckCircle2, Clock } from 'lucide-react';
+import { History, FileText, CheckCircle2, Trash2 } from 'lucide-react';
 import { formatBytes } from '@/lib/pdf-engine';
 
 interface TaskRecord {
@@ -35,8 +35,15 @@ export function RecentTasksBanner() {
     fetchTasks();
   }, []);
 
+  const handleClearHistory = async () => {
+    try {
+      await fetch('/api/tasks/log', { method: 'DELETE' });
+      setTasks([]);
+    } catch {}
+  };
+
   if (loading || tasks.length === 0) {
-    return null; // Keep layout clean if no tasks logged yet
+    return null;
   }
 
   return (
@@ -49,7 +56,19 @@ export function RecentTasksBanner() {
               Recent Activity
             </h3>
           </div>
-          <span className="text-[11px] text-slate-400 font-medium">100% Anonymous &bull; No Login</span>
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+              Ephemeral &bull; Auto-purged after 5 min
+            </span>
+            <button
+              onClick={handleClearHistory}
+              title="Clear activity log"
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 hover:text-rose-600 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Clear</span>
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">

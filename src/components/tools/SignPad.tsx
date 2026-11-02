@@ -8,9 +8,10 @@ import { downloadFile, formatBytes } from '@/lib/pdf-engine';
 interface SignPadProps {
   pdfFile: File;
   onBack: () => void;
+  onFinish?: (bytes: Uint8Array, filename: string) => void;
 }
 
-export function SignPad({ pdfFile, onBack }: SignPadProps) {
+export function SignPad({ pdfFile, onBack, onFinish }: SignPadProps) {
   const [tab, setTab] = useState<'draw' | 'type'>('draw');
   const [typedName, setTypedName] = useState('');
   const [penColor, setPenColor] = useState<'#000000' | '#1e40af'>('#000000');
@@ -32,6 +33,9 @@ export function SignPad({ pdfFile, onBack }: SignPadProps) {
   }, [penColor]);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if ('touches' in e && e.cancelable) {
+      e.preventDefault();
+    }
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -50,6 +54,9 @@ export function SignPad({ pdfFile, onBack }: SignPadProps) {
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawing.current) return;
+    if ('touches' in e && e.cancelable) {
+      e.preventDefault();
+    }
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -142,7 +149,12 @@ export function SignPad({ pdfFile, onBack }: SignPadProps) {
       const outputBytes = await pdfDoc.save({ useObjectStreams: true });
       const baseName = pdfFile.name.replace(/\.[^/.]+$/, '');
       const outputFilename = `${baseName}-signed.pdf`;
-      downloadFile(outputBytes, outputFilename);
+
+      if (onFinish) {
+        onFinish(outputBytes, outputFilename);
+      } else {
+        downloadFile(outputBytes, outputFilename);
+      }
     } catch (err: any) {
       alert(err.message || 'Error signing PDF.');
     } finally {
@@ -202,6 +214,8 @@ export function SignPad({ pdfFile, onBack }: SignPadProps) {
               onTouchStart={startDrawing}
               onTouchMove={draw}
               onTouchEnd={stopDrawing}
+              onTouchCancel={stopDrawing}
+              style={{ touchAction: 'none' }}
               className="w-full h-44 cursor-crosshair touch-none"
             />
             <div className="absolute bottom-2 left-3 text-[11px] text-slate-400 pointer-events-none">
