@@ -39,6 +39,7 @@ import {
   Lock,
   Unlock,
   FileSignature,
+  Signature,
   Send,
   Columns,
   Share2,
@@ -93,6 +94,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Lock,
   Unlock,
   FileSignature,
+  // Signature: use the native lucide Signature icon (pen-on-line) for Sign PDF
+  Signature,
   Send,
   Columns,
   Share2,
@@ -105,7 +108,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Tag,
   PenTool,
   Sheet,
-  Signature: FileSignature,
   File,
 };
 

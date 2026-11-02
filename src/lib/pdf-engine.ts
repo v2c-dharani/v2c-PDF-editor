@@ -1211,6 +1211,9 @@ export async function addAnnotationToPDF(
 
 /**
  * Redact target areas on PDF pages.
+ * options.header: blackout top header strip
+ * options.footer: blackout bottom footer strip
+ * options.center: blackout a middle confidential band
  */
 export async function redactPDF(
   file: File,
@@ -1227,7 +1230,8 @@ export async function redactPDF(
   for (const page of pages) {
     const { width, height } = page.getSize();
 
-    if (options.header ?? true) {
+    // Blackout top header region (names, dates, barcodes)
+    if (options.header) {
       page.drawRectangle({
         x: 36,
         y: height - 55,
@@ -1237,6 +1241,7 @@ export async function redactPDF(
       });
     }
 
+    // Blackout bottom footer region (page numbers, signatures)
     if (options.footer) {
       page.drawRectangle({
         x: 36,
@@ -1247,7 +1252,8 @@ export async function redactPDF(
       });
     }
 
-    if (options.center ?? true) {
+    // Blackout middle confidential band
+    if (options.center) {
       page.drawRectangle({
         x: 48,
         y: height / 2 - 25,

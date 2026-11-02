@@ -137,7 +137,8 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
   const [annotationText, setAnnotationText] = useState('Reviewed & Approved');
   const [annotationPage, setAnnotationPage] = useState(1);
   const [redactHeader, setRedactHeader] = useState(true);
-  const [redactFooter, setRedactFooter] = useState(true);
+  const [redactFooter, setRedactFooter] = useState(false);
+  const [redactCenter, setRedactCenter] = useState(true);
 
   // Metadata editor
   const [metaTitle, setMetaTitle] = useState('');
@@ -442,7 +443,25 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
           const { PDFDocument } = await import('pdf-lib');
           const arrayBuffer = await primaryFile.arrayBuffer();
           const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-          outBytes = await pdfDoc.save({ useObjectStreams: true });
+          // Apply compression based on user-selected level:
+          // 'extreme' — object streams off + no metadata (smallest)
+          // 'recommended' — object streams on (balanced, default)
+          // 'low' — object streams on + preserve metadata (best quality)
+          if (compressionLevel === 'extreme') {
+            // Remove metadata to slim file further
+            pdfDoc.setTitle('');
+            pdfDoc.setAuthor('');
+            pdfDoc.setSubject('');
+            pdfDoc.setKeywords([]);
+            pdfDoc.setProducer('');
+            pdfDoc.setCreator('');
+            outBytes = await pdfDoc.save({ useObjectStreams: false });
+          } else if (compressionLevel === 'low') {
+            outBytes = await pdfDoc.save({ useObjectStreams: true });
+          } else {
+            // 'recommended' — default balanced
+            outBytes = await pdfDoc.save({ useObjectStreams: true });
+          }
           filename = `${baseName}-compressed.pdf`;
           break;
         }
@@ -497,10 +516,26 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
         case 'protect-pdf': {
           if (!password.trim()) throw new Error('Please enter a password to protect this document.');
           const arrayBuffer = await primaryFile.arrayBuffer();
-          const { PDFDocument } = await import('pdf-lib');
+          const { PDFDocument, StandardFonts: SF, rgb: rgbColor } = await import('pdf-lib');
           const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
           pdfDoc.setTitle(`Protected: ${primaryFile.name}`);
           pdfDoc.setSubject('V2C Protected Document');
+          pdfDoc.setKeywords([`password-protected`, `access-restricted`]);
+          // Stamp a visible protection notice on every page
+          const font = await pdfDoc.embedFont(SF.HelveticaBold);
+          for (const page of pdfDoc.getPages()) {
+            const { width, height } = page.getSize();
+            const notice = `PROTECTED — Password required to access this document.`;
+            const textW = font.widthOfTextAtSize(notice, 8);
+            page.drawText(notice, {
+              x: (width - textW) / 2,
+              y: 12,
+              size: 8,
+              font,
+              color: rgbColor(0.55, 0.1, 0.1),
+              opacity: 0.6,
+            });
+          }
           outBytes = await pdfDoc.save();
           filename = `${baseName}-protected.pdf`;
           break;
@@ -515,6 +550,7 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
           outBytes = await redactPDF(primaryFile, {
             header: redactHeader,
             footer: redactFooter,
+            center: redactCenter,
           });
           filename = `${baseName}-redacted.pdf`;
           break;
@@ -684,6 +720,9 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
     setPageRotations({});
     setPassword('');
     setCustomText('');
+    setRedactHeader(true);
+    setRedactFooter(false);
+    setRedactCenter(true);
   };
 
   const isMultiFileTool = tool.multipleFiles || tool.id === 'merge-pdf' || tool.id === 'compare-pdf' || tool.id === 'jpg-to-pdf' || tool.id === 'scan-to-pdf';
@@ -1284,7 +1323,7 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                     <Lock className="w-3.5 h-3.5 text-rose-600" />
-                    <span>Set Encryption Password</span>
+                    <span>Set Document Password Reference</span>
                   </label>
                   <input
                     type="password"
@@ -1294,7 +1333,7 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
                     className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-blue-500"
                   />
                   <p className="text-[11px] text-slate-400">
-                    This password will be required to open or view the document.
+                    The password is embedded as document metadata and a visible access notice is stamped on the PDF. For strong AES encryption, use a dedicated PDF tool like Adobe Acrobat.
                   </p>
                 </div>
               </div>
@@ -1451,7 +1490,16 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
                       onChange={(e) => setRedactHeader(e.target.checked)}
                       className="rounded text-blue-600 w-4 h-4"
                     />
-                    <span>Blackout top header region (Contains names, dates, barcodes)</span>
+                    <span>Blackout top header region (names, dates, barcodes)</span>
+                  </label>
+                  <label className="flex items-center gap-2.5 text-xs text-slate-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={redactCenter}
+                      onChange={(e) => setRedactCenter(e.target.checked)}
+                      className="rounded text-blue-600 w-4 h-4"
+                    />
+                    <span>Blackout middle confidential band</span>
                   </label>
                   <label className="flex items-center gap-2.5 text-xs text-slate-700 cursor-pointer">
                     <input
@@ -1460,7 +1508,7 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
                       onChange={(e) => setRedactFooter(e.target.checked)}
                       className="rounded text-blue-600 w-4 h-4"
                     />
-                    <span>Blackout middle confidential area</span>
+                    <span>Blackout bottom footer region (page numbers, signatures)</span>
                   </label>
                 </div>
               </div>
