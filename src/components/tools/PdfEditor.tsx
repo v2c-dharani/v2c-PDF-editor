@@ -542,6 +542,13 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const pdfDocRef = useRef<any>(null);
+  const currentRenderTaskRef = useRef<any>(null);
+  const pagesRef = useRef<PageMeta[]>([]);
+  const [pdfDocReady, setPdfDocReady] = useState(0);
+
+  useEffect(() => {
+    pagesRef.current = pages;
+  }, [pages]);
 
   // Dragging, highlighting, and drawing states
   const [isDragging, setIsDragging] = useState(false);
@@ -621,10 +628,11 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
   const generateThumbnails = useCallback(async (doc: any, count: number, currentPages?: PageMeta[]) => {
     const thumbs: Record<number, string> = {};
     const maxInitial = Math.min(count, 10);
+    const activePages = currentPages || pagesRef.current;
     for (let i = 0; i < maxInitial; i++) {
       try {
         const page = await doc.getPage(i + 1);
-        const pageMeta = currentPages ? currentPages[i] : pages[i];
+        const pageMeta = activePages[i];
         const pageRot = ((page.rotate || 0) + (pageMeta?.rotation || 0)) % 360;
         const unscaled = page.getViewport({ scale: 1, rotation: pageRot });
         const vp = page.getViewport({ scale: 120 / unscaled.width, rotation: pageRot });
@@ -647,10 +655,11 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
     // Asynchronously render remaining page thumbnails so initial interaction is instantaneous
     if (count > maxInitial) {
       setTimeout(async () => {
+        const latestPages = pagesRef.current;
         for (let i = maxInitial; i < count; i++) {
           try {
             const page = await doc.getPage(i + 1);
-            const pageMeta = currentPages ? currentPages[i] : pages[i];
+            const pageMeta = latestPages[i];
             const pageRot = ((page.rotate || 0) + (pageMeta?.rotation || 0)) % 360;
             const unscaled = page.getViewport({ scale: 1, rotation: pageRot });
             const vp = page.getViewport({ scale: 120 / unscaled.width, rotation: pageRot });
@@ -669,7 +678,7 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
         setPageThumbnails((prev) => ({ ...prev, ...thumbs }));
       }, 50);
     }
-  }, [pages]);
+  }, []);
 
   // Render a specific page from the loaded PDF Document to the Canvas & Extract Text Items
   const renderCurrentPageToCanvas = useCallback(
@@ -678,6 +687,14 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
+
+      // Cancel any ongoing render task on this canvas before starting a new one
+      if (currentRenderTaskRef.current) {
+        try {
+          currentRenderTaskRef.current.cancel();
+        } catch {}
+        currentRenderTaskRef.current = null;
+      }
 
       const pageMeta = currentPages[pageIndex];
       const standardWidth = 595;
@@ -699,7 +716,10 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
         ctx.lineWidth = 1;
         ctx.strokeRect(20, 20, standardWidth - 40, standardHeight - 40);
 
-        setPageDimensions({ width: standardWidth, height: standardHeight });
+        setPageDimensions((prev) => {
+          if (prev.width === standardWidth && prev.height === standardHeight) return prev;
+          return { width: standardWidth, height: standardHeight };
+        });
         return;
       }
 
@@ -720,7 +740,10 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
           const isLandscape = actualW > actualH;
           const displayW = isLandscape ? Math.min(842, Math.round(standardWidth * 1.35)) : standardWidth;
           const displayH = Math.round((actualH / actualW) * displayW);
-          setPageDimensions({ width: displayW, height: displayH });
+          setPageDimensions((prev) => {
+            if (prev.width === displayW && prev.height === displayH) return prev;
+            return { width: displayW, height: displayH };
+          });
 
           // Render at 2x resolution for retina & high-DPI mobile sharpness
           const renderScale = (displayW / actualW) * 2;
@@ -734,10 +757,13 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
           ctx.fillStyle = '#ffffff';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-          await pdfPage.render({
+          const renderTask = pdfPage.render({
             canvasContext: ctx,
             viewport,
-          }).promise;
+          });
+          currentRenderTaskRef.current = renderTask;
+          await renderTask.promise;
+          currentRenderTaskRef.current = null;
 
           // Extract existing text content with coordinates for clickable editing
           try {
@@ -770,7 +796,11 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
           } catch (tcErr) {
             console.warn('Text content extraction notice:', tcErr);
           }
-        } catch (renderErr) {
+        } catch (renderErr: any) {
+          if (renderErr?.name === 'RenderingCancelledException' || renderErr?.message?.includes('cancelled')) {
+            // Render was intentionally cancelled by a subsequent render; ignore gracefully
+            return;
+          }
           console.error('PDF.js page render failed:', renderErr);
           // Fallback white page with document title
           canvas.width = standardWidth * 2;
@@ -840,7 +870,9 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
           id: `page-${i}-${Date.now()}`,
           originalIndex: i,
           isBlank: false,
+          rotation: 0,
         }));
+        pagesRef.current = initialPages;
         setPages(initialPages);
         setCurrentPageIndex(0);
 
@@ -853,8 +885,8 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
           }
         }
 
-        await renderCurrentPageToCanvas(0, initialPages, doc);
-        generateThumbnails(doc, count);
+        generateThumbnails(doc, count, initialPages);
+        setPdfDocReady((v) => v + 1);
       } catch (err: any) {
         console.warn('Worker PDF loading failed, attempting main-thread fallback:', err);
         try {
@@ -879,11 +911,13 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
             id: `page-${i}-${Date.now()}`,
             originalIndex: i,
             isBlank: false,
+            rotation: 0,
           }));
+          pagesRef.current = initialPages;
           setPages(initialPages);
           setCurrentPageIndex(0);
-          await renderCurrentPageToCanvas(0, initialPages, doc);
-          generateThumbnails(doc, count);
+          generateThumbnails(doc, count, initialPages);
+          setPdfDocReady((v) => v + 1);
         } catch (err2: any) {
           console.error('All PDF rendering attempts failed:', err2);
           setErrorMessage('Notice: Document opened in compatibility view.');
@@ -896,15 +930,32 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
     loadPdf();
     return () => {
       isCancelled = true;
+      if (currentRenderTaskRef.current) {
+        try {
+          currentRenderTaskRef.current.cancel();
+        } catch {}
+      }
     };
-  }, [activePdfFile, renderCurrentPageToCanvas, generateThumbnails]);
+  }, [activePdfFile, generateThumbnails]);
 
-  // Re-render canvas whenever page index changes
+  // Re-render canvas whenever page index, page rotation, or blank state changes
+  const activePage = pages[currentPageIndex];
+  const activePageRotation = activePage?.rotation || 0;
+  const activePageIsBlank = !!activePage?.isBlank;
+  const activePageOriginalIndex = activePage?.originalIndex;
+
   useEffect(() => {
-    if (pdfDocRef.current || pages[currentPageIndex]?.isBlank) {
-      renderCurrentPageToCanvas(currentPageIndex, pages, pdfDocRef.current);
+    if (pdfDocRef.current || activePageIsBlank) {
+      renderCurrentPageToCanvas(currentPageIndex, pagesRef.current, pdfDocRef.current);
     }
-  }, [currentPageIndex, pages, renderCurrentPageToCanvas]);
+  }, [
+    pdfDocReady,
+    currentPageIndex,
+    activePageRotation,
+    activePageIsBlank,
+    activePageOriginalIndex,
+    renderCurrentPageToCanvas,
+  ]);
 
   // Page Actions
   const handleAddBlankPage = () => {
@@ -1887,19 +1938,17 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
 
   // Rotate Active Page (0°, 90°, 180°, 270°) - Solves upside down/rotated PDFs
   const handleRotateCurrentPage = (angleDelta: number) => {
-    setPages((prev) => {
-      const updated = prev.map((p, idx) => {
-        if (idx !== currentPageIndex) return p;
-        const currentRot = p.rotation || 0;
-        const nextRot = (currentRot + angleDelta + 360) % 360;
-        return { ...p, rotation: nextRot };
-      });
-      if (pdfDocRef.current) {
-        renderCurrentPageToCanvas(currentPageIndex, updated, pdfDocRef.current);
-        generateThumbnails(pdfDocRef.current, updated.length, updated);
-      }
-      return updated;
+    const updated = pages.map((p, idx) => {
+      if (idx !== currentPageIndex) return p;
+      const currentRot = p.rotation || 0;
+      const nextRot = (currentRot + angleDelta + 360) % 360;
+      return { ...p, rotation: nextRot };
     });
+    pagesRef.current = updated;
+    setPages(updated);
+    if (pdfDocRef.current) {
+      generateThumbnails(pdfDocRef.current, updated.length, updated);
+    }
   };
 
   // Microsoft Word-Style Numbering & Roman Letters (IMG_20261102_110437.jpg & Screenshot_2026-11-02-12-51-40-36)
@@ -3352,7 +3401,7 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
                 width: `${pageDimensions.width * (zoom / 100)}px`,
                 height: `${pageDimensions.height * (zoom / 100)}px`,
               }}
-              className="relative shadow-2xl rounded-md transition-all duration-150 origin-top bg-white select-none"
+              className="relative shadow-2xl rounded-md origin-top bg-white select-none"
             >
               {/* Background Canvas (PDF Render) */}
               <canvas
