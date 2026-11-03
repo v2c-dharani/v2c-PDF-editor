@@ -252,15 +252,6 @@ export function Navbar() {
               </div>
             )}
 
-            {/* Clean end of sidebar marker */}
-            <div className="pt-4 pb-4 border-t border-slate-100 text-center">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[11px] font-bold">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span>All 38 Tools Available &bull; 100% Free</span>
-              </div>
-              <p className="text-[10px] text-slate-400 mt-1">End of tool directory</p>
-            </div>
-
             {/* Footer Channels & Attributions inside Mobile Drawer */}
             <div className="pt-4 pb-8 border-t border-slate-100 space-y-4">
               <div className="text-center">
@@ -295,12 +286,6 @@ export function Navbar() {
                     </div>
                   </a>
                 ))}
-              </div>
-
-              {/* Trust Badge */}
-              <div className="py-2 flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span className="font-medium text-slate-600">100% Private In-Browser Processing</span>
               </div>
 
               {/* Logo & Copyright */}

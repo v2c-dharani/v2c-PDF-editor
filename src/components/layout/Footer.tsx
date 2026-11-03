@@ -179,15 +179,6 @@ export function Footer() {
           ))}
         </div>
 
-        {/* End of tool directory marker */}
-        <div className="pt-2 pb-8 text-center">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[11px] font-bold">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>All 38 Tools Available &bull; 100% Free</span>
-          </div>
-          <p className="text-[10px] text-slate-400 mt-1">End of tool directory</p>
-        </div>
-
         {/* --- OFFICIAL SOCIAL & CONTACT SECTION --- */}
         <div className="pt-10 pb-8 border-t border-slate-200">
           <div className="text-center max-w-xl mx-auto mb-7">
@@ -232,22 +223,6 @@ export function Footer() {
                 </div>
               </a>
             ))}
-          </div>
-        </div>
-
-        {/* --- PRIVACY & TRUST HIGHLIGHTS (UX Trust Indicator) --- */}
-        <div className="py-6 border-t border-slate-200/80 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs text-slate-500">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
-            <span className="font-medium text-slate-600">100% Private In-Browser Processing</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
-            <span className="font-medium text-slate-600">Zero Files Uploaded to Any Server</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-indigo-500 flex-shrink-0" />
-            <span className="font-medium text-slate-600">Free &amp; Unlimited Document Tools</span>
           </div>
         </div>
 
