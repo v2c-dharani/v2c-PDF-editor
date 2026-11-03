@@ -62,7 +62,7 @@ export function ToolsGrid() {
               <Link
                 key={tool.id}
                 href={tool.href}
-                prefetch={false}
+                prefetch={true}
                 aria-label={`Open ${tool.name} tool`}
                 className={`group relative p-5 rounded-2xl bg-white border ${tool.borderColor} transition-all duration-200 hover:-translate-y-1 hover:shadow-lg active:scale-[0.98] flex flex-col justify-between cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-blue-500`}
               >

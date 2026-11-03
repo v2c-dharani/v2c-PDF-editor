@@ -790,7 +790,7 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
             <div className="flex items-center justify-between gap-3 mb-3 sm:mb-4">
               <Link
                 href="/"
-                prefetch={false}
+                prefetch={true}
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200 transition-all active:scale-95 shadow-2xs group cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5 text-slate-500 group-hover:-translate-x-0.5 transition-transform" />
@@ -798,7 +798,7 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
               </Link>
 
               <nav aria-label="Breadcrumb" className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-                <Link href="/" prefetch={false} className="hover:text-blue-600 transition-colors">
+                <Link href="/" prefetch={true} className="hover:text-blue-600 transition-colors">
                   Home
                 </Link>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
@@ -959,7 +959,7 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
                 </button>
                 <Link
                   href="/"
-                  prefetch={false}
+                  prefetch={true}
                   className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-50 hover:bg-slate-100 transition-colors border border-slate-200 cursor-pointer inline-flex items-center gap-1.5"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
@@ -1617,7 +1617,7 @@ export function UniversalToolRunner({ tool }: UniversalToolRunnerProps) {
               </button>
               <Link
                 href="/"
-                prefetch={false}
+                prefetch={true}
                 className="w-full px-5 py-3 rounded-xl bg-[#0B1B3D] text-white font-bold text-xs sm:text-sm hover:bg-[#122754] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
               >
                 <ArrowLeft className="w-4 h-4" />

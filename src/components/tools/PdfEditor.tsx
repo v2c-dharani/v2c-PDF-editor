@@ -2140,7 +2140,7 @@ export function PdfEditor({ pdfFile, onBack, onFinish }: PdfEditorProps) {
 
           <Link
             href="/"
-            prefetch={false}
+            prefetch={true}
             className="p-1.5 sm:p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors flex items-center gap-1.5 text-xs font-bold cursor-pointer"
             title="Back to Homepage"
           >

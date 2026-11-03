@@ -57,7 +57,7 @@ export function Navbar() {
         
         {/* Left: Brand Logo (Replaced with new exact logo image as requested) */}
         <div className="flex items-center gap-3 sm:gap-6">
-          <Link href="/" prefetch={false} className="flex items-center group transition-transform hover:opacity-90">
+          <Link href="/" prefetch={true} className="flex items-center group transition-transform hover:opacity-90">
             <Image 
               src="/v2c-pdf-editor-logo.png" 
               alt="v2c PDF editor" 
@@ -91,7 +91,7 @@ export function Navbar() {
                   <Link
                     key={t.id}
                     href={t.href}
-                    prefetch={false}
+                    prefetch={true}
                     onClick={() => {
                       setSearchFocused(false);
                       setSearchQuery('');
@@ -119,22 +119,22 @@ export function Navbar() {
         {/* Right: Direct Tool Links & Free Badges (No Login/Signup) */}
         <div className="flex items-center gap-2 sm:gap-3">
           <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold text-slate-700">
-            <Link href="/tools/merge-pdf" prefetch={false} className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
+            <Link href="/tools/merge-pdf" prefetch={true} className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
               Merge
             </Link>
-            <Link href="/tools/split-pdf" prefetch={false} className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
+            <Link href="/tools/split-pdf" prefetch={true} className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
               Split
             </Link>
-            <Link href="/tools/compress-pdf" prefetch={false} className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
+            <Link href="/tools/compress-pdf" prefetch={true} className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
               Compress
             </Link>
-            <Link href="/tools/jpg-to-pdf" prefetch={false} className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
+            <Link href="/tools/jpg-to-pdf" prefetch={true} className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
               Convert
             </Link>
-            <Link href="/tools/sign-pdf" prefetch={false} className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
+            <Link href="/tools/sign-pdf" prefetch={true} className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
               Sign
             </Link>
-            <Link href="/tools/edit-pdf" prefetch={false} className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
+            <Link href="/tools/edit-pdf" prefetch={true} className="px-3 py-2 rounded-lg hover:bg-slate-100 hover:text-slate-900 transition-colors">
               Edit
             </Link>
           </nav>
@@ -199,7 +199,7 @@ export function Navbar() {
                     <Link
                       key={t.id}
                       href={t.href}
-                      prefetch={false}
+                      prefetch={true}
                       onClick={() => {
                         setMobileMenuOpen(false);
                         setSearchQuery('');
@@ -233,7 +233,7 @@ export function Navbar() {
                           <Link
                             key={t.id}
                             href={t.href}
-                            prefetch={false}
+                            prefetch={true}
                             onClick={() => setMobileMenuOpen(false)}
                             className="flex items-center gap-2.5 p-2 rounded-xl hover:bg-slate-50 active:bg-slate-100 text-slate-700 text-xs transition-colors min-h-[40px]"
                           >

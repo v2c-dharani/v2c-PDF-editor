@@ -180,7 +180,7 @@ export function SignPad({ pdfFile, onBack, onFinish }: SignPadProps) {
           </button>
           <Link
             href="/"
-            prefetch={false}
+            prefetch={true}
             className="text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1 cursor-pointer px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors"
           >
             <Home className="w-3.5 h-3.5" /> Homepage
