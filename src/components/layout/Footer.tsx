@@ -9,7 +9,7 @@ import { CATEGORIES, ALL_TOOLS } from '@/lib/tools-data';
 
 // --- PIXEL-PERFECT BRAND ICONS ---
 
-function LinkedInIcon({ className = 'w-6 h-6' }: { className?: string }) {
+export function LinkedInIcon({ className = 'w-6 h-6' }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <rect width="24" height="24" rx="5" fill="#0A66C2" />
@@ -21,7 +21,7 @@ function LinkedInIcon({ className = 'w-6 h-6' }: { className?: string }) {
   );
 }
 
-function WhatsAppIcon({ className = 'w-6 h-6' }: { className?: string }) {
+export function WhatsAppIcon({ className = 'w-6 h-6' }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <circle cx="12" cy="12" r="12" fill="#25D366" />
@@ -35,7 +35,7 @@ function WhatsAppIcon({ className = 'w-6 h-6' }: { className?: string }) {
   );
 }
 
-function InstagramIcon({ className = 'w-6 h-6' }: { className?: string }) {
+export function InstagramIcon({ className = 'w-6 h-6' }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <defs>
@@ -55,7 +55,7 @@ function InstagramIcon({ className = 'w-6 h-6' }: { className?: string }) {
   );
 }
 
-function FacebookIcon({ className = 'w-6 h-6' }: { className?: string }) {
+export function FacebookIcon({ className = 'w-6 h-6' }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <circle cx="12" cy="12" r="12" fill="#1877F2" />
@@ -67,7 +67,7 @@ function FacebookIcon({ className = 'w-6 h-6' }: { className?: string }) {
   );
 }
 
-function GithubIcon({ className = 'w-6 h-6' }: { className?: string }) {
+export function GithubIcon({ className = 'w-6 h-6' }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <circle cx="12" cy="12" r="12" fill="#181717" />
@@ -82,7 +82,7 @@ function GithubIcon({ className = 'w-6 h-6' }: { className?: string }) {
 }
 
 // 5 Official Social & Support Channels
-const SOCIAL_CONTACTS = [
+export const SOCIAL_CONTACTS = [
   {
     id: 'linkedin',
     name: 'LinkedIn',
@@ -177,6 +177,15 @@ export function Footer() {
               </ul>
             </div>
           ))}
+        </div>
+
+        {/* End of tool directory marker */}
+        <div className="pt-2 pb-8 text-center">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[11px] font-bold">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span>All 38 Tools Available &bull; 100% Free</span>
+          </div>
+          <p className="text-[10px] text-slate-400 mt-1">End of tool directory</p>
         </div>
 
         {/* --- OFFICIAL SOCIAL & CONTACT SECTION --- */}

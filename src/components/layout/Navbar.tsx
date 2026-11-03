@@ -8,10 +8,12 @@ import {
   Search, 
   Menu, 
   X, 
-  FileText
+  FileText,
+  ArrowUpRight,
 } from 'lucide-react';
 import { ALL_TOOLS, CATEGORIES } from '@/lib/tools-data';
 import { DynamicIcon } from '@/components/common/DynamicIcon';
+import { SOCIAL_CONTACTS } from '@/components/layout/Footer';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -251,12 +253,80 @@ export function Navbar() {
             )}
 
             {/* Clean end of sidebar marker */}
-            <div className="pt-4 pb-6 border-t border-slate-100 text-center">
+            <div className="pt-4 pb-4 border-t border-slate-100 text-center">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[11px] font-bold">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
                 <span>All 38 Tools Available &bull; 100% Free</span>
               </div>
               <p className="text-[10px] text-slate-400 mt-1">End of tool directory</p>
+            </div>
+
+            {/* Footer Channels & Attributions inside Mobile Drawer */}
+            <div className="pt-4 pb-8 border-t border-slate-100 space-y-4">
+              <div className="text-center">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 text-[10px] font-bold tracking-wide uppercase mb-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
+                  Official Channels &amp; Support
+                </div>
+                <h4 className="text-xs font-bold text-slate-900">Connect with vibe2code</h4>
+              </div>
+
+              {/* 5 Social Contact Cards */}
+              <div className="grid grid-cols-2 gap-2">
+                {SOCIAL_CONTACTS.map((item) => (
+                  <a
+                    key={item.id}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={item.ariaLabel}
+                    className={`group flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-white hover:border-blue-300 hover:shadow-xs active:scale-[0.98] transition-all ${
+                      item.id === 'github' ? 'col-span-2 justify-center' : ''
+                    }`}
+                  >
+                    <item.icon className="w-6 h-6 flex-shrink-0 rounded-lg shadow-xs" />
+                    <div className="min-w-0 text-left">
+                      <div className="text-[11px] font-semibold text-slate-800 tracking-tight truncate group-hover:text-blue-600 transition-colors">
+                        {item.handle}
+                      </div>
+                      <span className="text-[9px] font-medium text-slate-400 block truncate">
+                        {item.name} &bull; {item.tag}
+                      </span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+
+              {/* Trust Badge */}
+              <div className="py-2 flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="font-medium text-slate-600">100% Private In-Browser Processing</span>
+              </div>
+
+              {/* Logo & Copyright */}
+              <div className="pt-3 border-t border-slate-100 flex flex-col items-center justify-center gap-2 text-[11px] text-slate-500">
+                <div className="bg-white px-2 py-0.5 rounded-md border border-slate-200/80 shadow-xs flex items-center">
+                  <Image
+                    src="/v2c-pdf-editor-logo.png"
+                    alt="v2c PDF editor"
+                    width={120}
+                    height={40}
+                    className="h-5 w-auto object-contain mix-blend-multiply"
+                  />
+                </div>
+                <span>&copy; {new Date().getFullYear()} All rights reserved.</span>
+                <div className="flex items-center gap-1 text-[11px] text-slate-500">
+                  <span>Design and developed by</span>
+                  <a
+                    href="https://vibe2code.in/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-blue-600 hover:underline"
+                  >
+                    vibe2code
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
